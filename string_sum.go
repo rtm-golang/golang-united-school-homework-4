@@ -1,11 +1,10 @@
-// package string_sum
-package main
+package string_sum
 
 import (
 	"errors"
 	"fmt"
 	"strconv"
-	"unicode"
+	"strings"
 )
 
 //use these errors as appropriate, wrapping them with fmt.Errorf function
@@ -14,8 +13,8 @@ var (
 	errorEmptyInput = errors.New("input is empty")
 	// Use when the expression has number of operands not equal to two
 	errorNotTwoOperands = errors.New("expecting two operands, but received more or less")
-	// Use when the operands expected
-	errorOperandExpected = errors.New("Operands Error: operand expected")
+	// Use when the expression invalid
+	errorInvalidInput = errors.New("Expression Error: input invalid")
 )
 
 // Implement a function that computes the sum of two int numbers written as a string
@@ -28,73 +27,50 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
-func StringSum(input string) (output string, err error) {
-	si := -1
-	o := make([]int, 0)
-	m := 1
-	b := false
-	for i, r := range input + " " {
-		if unicode.IsDigit(r) {
-			if si == -1 {
-				si = i
-				if m == 0 {
-					err = errors.New("Unexpected Error: operator (+/-) expected")
-				}
-			}
-			b = false
-		} else if r == '+' || r == '-' || r == ' ' {
-			if si != -1 {
-				n, e := strconv.Atoi(input[si:i])
-				if e == nil {
-					o = append(o, m*n)
-				} else {
-					err = fmt.Errorf("Unexpected Error: %w", e)
-				}
-				si = -1
-			}
-			if r == '-' {
-				m = -1
-				if b {
-					err = errorOperandExpected
-				}
-				b = true
-			} else {
-				if r == '+' {
-					m = 1
-					if b {
-						err = errorOperandExpected
-					}
-					b = true
-				} else if !b {
-					m = 0
-				}
-			}
+func ParseExpression(input string) (output []string, err error) {
+	spaced := strings.ReplaceAll(strings.ReplaceAll(input, "+", " + "), "-", " - ")
+	o := make([]string, 0)
+	sign := 1
+	for _, s := range strings.Split(spaced, " ") {
+		if s == "+" {
+			sign = 1
+		} else if s == "-" {
+			sign = -1
+		} else if s == "" {
+			//
 		} else {
-			err = errors.New("Input Error: not valid, only operator (+/-), spaces and digits allowed")
-			si = -1
+			if sign == 0 {
+				return nil, errorInvalidInput
+			} else if sign == 1 {
+				o = append(o, s)
+			} else if sign == -1 {
+				o = append(o, "-"+s)
+			}
+			sign = 0
 		}
-		if len(o) > 2 {
-			err = fmt.Errorf("Operands Error: %w", errorNotTwoOperands)
-		}
 	}
-	if b {
-		err = errorOperandExpected
+	if len(o) == 0 {
+		return nil, errorEmptyInput
+	} else if sign != 0 {
+		return nil, errorInvalidInput
 	}
-	if err != nil {
-		return output, err
-	}
-	if len(o) == 1 {
-		err = fmt.Errorf("Operands Error: %w", errorNotTwoOperands)
-	} else if len(o) == 0 {
-		err = fmt.Errorf("Input Error: %w", errorEmptyInput)
-	}
-	if err == nil {
-		output = strconv.Itoa(o[0] + o[1])
-	}
-	return output, err
+	return o, nil
 }
 
-func main() {
-	s := "5f+5"
-	fmt.Println(StringSum(s))
+func StringSum(input string) (output string, err error) {
+	s, e := ParseExpression(input)
+	if e != nil {
+		return "", e
+	} else if len(s) != 2 {
+		return "", errorNotTwoOperands
+	}
+	i := make([]int, 0)
+	for _, o := range s {
+		n, e := strconv.Atoi(o)
+		if e != nil {
+			return "", fmt.Errorf("Operand Error: %w", e)
+		}
+		i = append(i, n)
+	}
+	return strconv.Itoa(i[0] + i[1]), nil
 }
