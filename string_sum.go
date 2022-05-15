@@ -1,4 +1,5 @@
-package string_sum
+// package string_sum
+package main
 
 import (
 	"errors"
@@ -14,7 +15,7 @@ var (
 	// Use when the expression has number of operands not equal to two
 	errorNotTwoOperands = errors.New("expecting two operands, but received more or less")
 	// Use when the operands expected
-	errorOperandExpected = errors.New("operand expected")
+	errorOperandExpected = errors.New("Operands Error: operand expected")
 )
 
 // Implement a function that computes the sum of two int numbers written as a string
@@ -54,14 +55,14 @@ func StringSum(input string) (output string, err error) {
 			if r == '-' {
 				m = -1
 				if b {
-					err = fmt.Errorf("Operand Error: %w", errorOperandExpected)
+					err = errorOperandExpected
 				}
 				b = true
 			} else {
 				if r == '+' {
 					m = 1
 					if b {
-						err = fmt.Errorf("Operand Error: %w", errorOperandExpected)
+						err = errorOperandExpected
 					}
 					b = true
 				} else if !b {
@@ -77,7 +78,10 @@ func StringSum(input string) (output string, err error) {
 		}
 	}
 	if b {
-		err = fmt.Errorf("Operand Error: %w", errorOperandExpected)
+		err = errorOperandExpected
+	}
+	if err != nil {
+		return output, err
 	}
 	if len(o) == 1 {
 		err = fmt.Errorf("Operands Error: %w", errorNotTwoOperands)
@@ -88,4 +92,9 @@ func StringSum(input string) (output string, err error) {
 		output = strconv.Itoa(o[0] + o[1])
 	}
 	return output, err
+}
+
+func main() {
+	s := "5f+5"
+	fmt.Println(StringSum(s))
 }
