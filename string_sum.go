@@ -2,6 +2,9 @@ package string_sum
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"unicode"
 )
 
 //use these errors as appropriate, wrapping them with fmt.Errorf function
@@ -23,5 +26,63 @@ var (
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
 func StringSum(input string) (output string, err error) {
-	return "", nil
+	si := -1
+	o := make([]int, 0)
+	m := 1
+	b := false
+	for i, r := range input + " " {
+		if unicode.IsDigit(r) {
+			if si == -1 {
+				si = i
+				if m == 0 {
+					err = errors.New("Unexpected Error: operator (+/-) expected")
+				}
+			}
+			b = false
+		} else if r == '+' || r == '-' || r == ' ' {
+			if si != -1 {
+				n, e := strconv.Atoi(input[si:i])
+				if e != nil {
+					err = fmt.Errorf("Unexpected Error: %w", e)
+				}
+				o = append(o, m*n)
+				si = -1
+			}
+			if r == '-' {
+				m = -1
+				if b {
+					err = errors.New("Operands Error: operand expected")
+				}
+				b = true
+			} else {
+				if r == '+' {
+					m = 1
+					if b {
+						err = errors.New("Operands Error: operand expected")
+					}
+					b = true
+				} else if !b {
+					m = 0
+				}
+			}
+		} else {
+			err = errors.New("Input Error: not valid, only operator (+/-), spaces and digits allowed")
+			si = -1
+		}
+		if len(o) > 2 {
+			err = fmt.Errorf("Operands Error: %w", errorNotTwoOperands)
+		}
+	}
+	if b {
+		err = errors.New("Operands Error: operand expected")
+	}
+	if len(o) == 1 {
+		err = fmt.Errorf("Operands Error: %w", errorNotTwoOperands)
+	} else if len(o) == 0 {
+		err = fmt.Errorf("Input Error: %w", errorNotTwoOperands)
+	}
+	if err == nil {
+		output = strconv.Itoa(o[0] + o[1])
+	}
+	return output, err
 }
