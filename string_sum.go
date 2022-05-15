@@ -50,7 +50,7 @@ func ParseExpression(input string) (output []string, err error) {
 		}
 	}
 	if len(o) == 0 {
-		return nil, errorEmptyInput
+		return nil, fmt.Errorf("Expression Error: %w", errorEmptyInput)
 	} else if sign != 0 {
 		return nil, errorInvalidInput
 	}
@@ -62,7 +62,7 @@ func StringSum(input string) (output string, err error) {
 	if e != nil {
 		return "", e
 	} else if len(s) != 2 {
-		return "", errorNotTwoOperands
+		return "", fmt.Errorf("Operand Error: %w", errorNotTwoOperands)
 	}
 	i := make([]int, 0)
 	for _, o := range s {
