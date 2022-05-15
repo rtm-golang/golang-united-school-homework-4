@@ -13,6 +13,8 @@ var (
 	errorEmptyInput = errors.New("input is empty")
 	// Use when the expression has number of operands not equal to two
 	errorNotTwoOperands = errors.New("expecting two operands, but received more or less")
+	// Use when the operands expected
+	errorOperandExpected = errors.New("operand expected")
 )
 
 // Implement a function that computes the sum of two int numbers written as a string
@@ -42,23 +44,24 @@ func StringSum(input string) (output string, err error) {
 		} else if r == '+' || r == '-' || r == ' ' {
 			if si != -1 {
 				n, e := strconv.Atoi(input[si:i])
-				if e != nil {
+				if e == nil {
+					o = append(o, m*n)
+				} else {
 					err = fmt.Errorf("Unexpected Error: %w", e)
 				}
-				o = append(o, m*n)
 				si = -1
 			}
 			if r == '-' {
 				m = -1
 				if b {
-					err = errors.New("Operands Error: operand expected")
+					err = fmt.Errorf("Operand Error: %w", errorOperandExpected)
 				}
 				b = true
 			} else {
 				if r == '+' {
 					m = 1
 					if b {
-						err = errors.New("Operands Error: operand expected")
+						err = fmt.Errorf("Operand Error: %w", errorOperandExpected)
 					}
 					b = true
 				} else if !b {
@@ -74,12 +77,12 @@ func StringSum(input string) (output string, err error) {
 		}
 	}
 	if b {
-		err = errors.New("Operands Error: operand expected")
+		err = fmt.Errorf("Operand Error: %w", errorOperandExpected)
 	}
 	if len(o) == 1 {
 		err = fmt.Errorf("Operands Error: %w", errorNotTwoOperands)
 	} else if len(o) == 0 {
-		err = fmt.Errorf("Input Error: %w", errorNotTwoOperands)
+		err = fmt.Errorf("Input Error: %w", errorEmptyInput)
 	}
 	if err == nil {
 		output = strconv.Itoa(o[0] + o[1])
